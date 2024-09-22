@@ -10,7 +10,7 @@ const bookingRoutes = require('./routes/bookingroutes');
 const guideRoutes = require('./routes/guideroutes');
 const QRCodeRoutes = require('./routes/qr_coderoutes');
 const olaMapRoutes = require('./routes/olamaproutes');
-
+const userRoutes = require('./routes/useroutes');
 dotenv.config();
 const app = express();
 
@@ -31,6 +31,8 @@ app.use('/api/booking', bookingRoutes);
 app.use('/api/guide', guideRoutes);
 app.use('/api/qr_code', QRCodeRoutes);
 app.use('/api/ola-maps', olaMapRoutes);
+app.use("/api/user", userRoutes)
+
 
 console.log('MongoDB URI:', process.env.MONGO_URI); // Add this line
 

@@ -1,10 +1,16 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { MapPinIcon, MenuIcon, X, User, UserPlus } from 'lucide-react';
-
+import { MapPinIcon, MenuIcon, X, User, LogOut } from 'lucide-react';
+import { useAuth } from '../auth/AuthContext';
 const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const { isAuthenticated, logout } = useAuth(); // Use the useAuth hook
+
+  const handleLogout = () => {
+    logout();
+    // Additional logout logic if needed
+  };
 
   return (
     <header className="bg-white shadow-sm">
@@ -40,15 +46,28 @@ const Header = () => {
             </Link>
           </nav>
           <div className="hidden md:flex items-center justify-end md:flex-1 lg:w-0 space-x-4">
-            <Button 
-              className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              <User className="mr-2 h-5 w-5" />
-              Sign In
-            </Button>
+            {isAuthenticated ? (
+              <Button 
+                onClick={handleLogout}
+                className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              >
+                <LogOut className="mr-2 h-5 w-5" />
+                Logout
+              </Button>
+            ) : (
+              <Link to="/auth">
+                <Button 
+                  className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  <User className="mr-2 h-5 w-5" />
+                  Sign In
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </div>
+
 
       {/* Mobile menu, show/hide based on menu state */}
       {isMenuOpen && (
@@ -87,10 +106,20 @@ const Header = () => {
               </div>
             </div>
             <div className="py-6 px-5 space-y-6">
-              <Button className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-base font-medium text-gray-700 bg-gray-100 hover:bg-gray-200">
-                <User className="mr-2 h-5 w-5" />
-                Sign In
-              </Button>
+              {isAuthenticated ? (
+                <Button 
+                  onClick={onLogout}
+                  className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-red-600 hover:bg-red-700"
+                >
+                  <LogOut className="mr-2 h-5 w-5" />
+                  Logout
+                </Button>
+              ) : (
+                <Button className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-base font-medium text-gray-700 bg-gray-100 hover:bg-gray-200">
+                  <User className="mr-2 h-5 w-5" />
+                  Sign In
+                </Button>
+              )}
             </div>
           </div>
         </div>

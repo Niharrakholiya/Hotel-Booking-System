@@ -1,13 +1,13 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
+import axios from 'axios';
+import { AuthProvider, useAuth } from './features/auth/AuthContext';
 import LandingPage from './pages/LandingPage';
 import HotelBooking from './pages/HotelBookingPage';
 import RoomBookingPage from './pages/RoomBookingPage';
 import UserDetailsPage from './pages/UserDetailsPage';
 import AuthPage from './pages/AuthenticationPage';
-import { AuthProvider, useAuth } from './features/auth/AuthContext';
-import axios from 'axios';
 
 const PrivateRoute = ({ children }) => {
   const { isAuthenticated } = useAuth();
@@ -25,32 +25,52 @@ function App() {
 function AppContent() {
   const { isAuthenticated } = useAuth();
 
-  React.useEffect(() => {
-    try {
-      if (isAuthenticated) {
-        const token = Cookies.get('jwt_token');
-        if (token) {
-          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        }
+  useEffect(() => {
+    const setAxiosAuthHeader = () => {
+      const token = Cookies.get('jwt_token');
+      if (isAuthenticated && token) {
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       } else {
         delete axios.defaults.headers.common['Authorization'];
       }
+    };
+
+    try {
+      setAxiosAuthHeader();
     } catch (error) {
       console.error('Error setting axios headers:', error);
-      // Handle the error appropriately, e.g., show an error message to the user
     }
   }, [isAuthenticated]);
 
   return (
-    <main>
-      <Routes>
-        <Route path="/" element={<PrivateRoute><LandingPage /></PrivateRoute>} />
-        <Route path="/hotels" element={<PrivateRoute><HotelBooking /></PrivateRoute>} />
-        <Route path="/book" element={<PrivateRoute><RoomBookingPage /></PrivateRoute>} />
-        <Route path="/details" element={<PrivateRoute><UserDetailsPage /></PrivateRoute>} />
-        <Route path="/auth" element={<AuthPage />} />
-      </Routes>
-    </main>
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/auth" element={<AuthPage />} />
+      <Route 
+        path="/hotels" 
+        element={
+          <PrivateRoute>
+            <HotelBooking />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
+        path="/book" 
+        element={
+          <PrivateRoute>
+            <RoomBookingPage />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
+        path="/details" 
+        element={
+          <PrivateRoute>
+            <UserDetailsPage />
+          </PrivateRoute>
+        } 
+      />
+    </Routes>
   );
 }
 

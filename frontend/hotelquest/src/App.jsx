@@ -8,7 +8,7 @@ import HotelBooking from './pages/HotelBookingPage';
 import RoomBookingPage from './pages/RoomBookingPage';
 import UserDetailsPage from './pages/UserDetailsPage';
 import AuthPage from './pages/AuthenticationPage';
-
+import HotelDashboard from './admin/HotelDashboard';
 const PrivateRoute = ({ children }) => {
   const { isAuthenticated } = useAuth();
   return isAuthenticated ? children : <Navigate to="/auth" />;
@@ -67,6 +67,14 @@ function AppContent() {
         element={
           <PrivateRoute>
             <UserDetailsPage />
+          </PrivateRoute>
+        } 
+      />
+       <Route 
+        path="/dashboard" 
+        element={
+          <PrivateRoute>
+            <HotelDashboard />
           </PrivateRoute>
         } 
       />

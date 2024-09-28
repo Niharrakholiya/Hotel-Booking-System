@@ -1,27 +1,40 @@
-// middleware/auth-middleware.js
 const jwt = require('jsonwebtoken');
-const UserModel = require('../models/user');
+const User = require('../models/user');
 
-const checkUserAuth = async (req, res, next) => {
-  let token;
-  const { authorization } = req.headers;
-  
-  if (authorization && authorization.startsWith('Bearer')) {
-    try {
-      token = authorization.split(' ')[1];
-      const { userID, role } = jwt.verify(token, process.env.JWT_SECRET_KEY);
-      req.user = await UserModel.findById(userID).select('-password');
-      req.user.role = role; // Attach role to req.user
-      next();
-    } catch (error) {
-      console.log(error);
-      return res.status(401).send({ status: 'failed', message: 'Unauthorized User' });
+const auth = async (req, res, next) => {
+  console.log('Entered auth middleware');
+  console.log('Cookies:', req.cookies);
+  console.log('Headers:', req.headers);
+
+  try {
+    let token = req.cookies.jwt_token || req.header('Authorization')?.replace('Bearer ', '');
+
+    if (!token) {
+      console.log('No token provided');
+      return res.status(401).json({ status: 'failed', message: 'No authentication token provided' });
     }
-  }
-  
-  if (!token) {
-    return res.status(401).send({ status: 'failed', message: 'Unauthorized User, No Token' });
+
+    console.log('Token received:', token);
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    console.log('Decoded token:', decoded);
+
+    const user = await User.findById(decoded.userID);
+
+    if (!user) {
+      console.log('No user found for token');
+      return res.status(401).json({ status: 'failed', message: 'User not found' });
+    }
+
+    console.log('User found:', user);
+
+    req.token = token;
+    req.user = user;
+    next();
+  } catch (error) {
+    console.error('Error in auth middleware:', error);
+    res.status(401).json({ status: 'failed', message: 'Please authenticate', details: error.message });
   }
 };
 
-module.exports = checkUserAuth;
+module.exports = auth;

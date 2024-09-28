@@ -24,6 +24,7 @@ const HotelBooking = () => {
         setError(error.message); // Set error state
         setLoading(false); // Set loading to false even if there is an error
       }
+
     };
 
     fetchHotels();

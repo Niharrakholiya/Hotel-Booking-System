@@ -9,7 +9,7 @@ const HotelCard = ({ hotel }) => {
   return (
     <Card className="w-full max-w-md mx-auto overflow-hidden transition-shadow duration-300 hover:shadow-lg">
       <CardHeader className="p-0">
-        <img src={hotel.photos} alt={hotel.name} className="w-full h-48 object-cover" />
+        <img src={`http://localhost:5000/${hotel.photos[0]}`} alt={hotel.name} className="w-full h-48 object-cover" />
       </CardHeader>
       <CardContent className="p-4">
         <div className="flex justify-between items-start mb-2">

@@ -29,7 +29,7 @@ const HotelList = ({ hotels }) => {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {sortedHotels.map((hotel) => (
-          <HotelCard key={hotel.id} hotel={hotel} />
+          <HotelCard key={hotel.name} hotel={hotel} />
         ))}
       </div>
     </div>

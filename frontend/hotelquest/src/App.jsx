@@ -8,7 +8,9 @@ import HotelBooking from './pages/HotelBookingPage';
 import RoomBookingPage from './pages/RoomBookingPage';
 import UserDetailsPage from './pages/UserDetailsPage';
 import AuthPage from './pages/AuthenticationPage';
-import HotelDashboard from './admin/HotelDashboard';
+import HotelDashboard from './features/admin/HotelDashboard';
+import RoomManagement from './features/admin/Roomadd';
+
 const PrivateRoute = ({ children }) => {
   const { isAuthenticated } = useAuth();
   return isAuthenticated ? children : <Navigate to="/auth" />;
@@ -75,6 +77,14 @@ function AppContent() {
         element={
           <PrivateRoute>
             <HotelDashboard />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
+        path="/roomadd" 
+        element={
+          <PrivateRoute>
+            <RoomManagement />
           </PrivateRoute>
         } 
       />

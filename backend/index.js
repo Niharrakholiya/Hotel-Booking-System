@@ -12,7 +12,7 @@ const olaMapRoutes = require('./routes/olamaproutes');
 const userRoutes = require('./routes/useroutes');
 const cookieParser = require('cookie-parser'); // Import cookie-parser
 const path = require('path'); // Import path for handling file paths
-
+const paymentRoutes = require('./routes/paymentroutes');
 dotenv.config();
 const app = express();
 
@@ -39,6 +39,7 @@ app.use('/api/booking', bookingRoutes);
 app.use('/api/qr_code', QRCodeRoutes);
 app.use('/api/ola-maps', olaMapRoutes);
 app.use('/api/user', userRoutes); // Corrected the user routes
+app.use('/api/payment', paymentRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 console.log('MongoDB URI:', process.env.MONGO_URI); // Log the MongoDB URI

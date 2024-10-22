@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { Loader2, CheckCircle2 } from "lucide-react";
 import Cookies from 'js-cookie';
+import PaymentComponent from './PayementPage';
 const GuestDetailsPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -16,7 +17,8 @@ const GuestDetailsPage = () => {
   const [bookingConfirmed, setBookingConfirmed] = useState(false);
   const [confirmedBookingId, setConfirmedBookingId] = useState(null);
   const bookingData = location.state?.bookingData;
-
+  const [showPayment, setShowPayment] = useState(false);
+  const [currentBooking, setCurrentBooking] = useState(null);
   // Redirect if no booking data
   if (!bookingData) {
     navigate('/');
@@ -73,6 +75,10 @@ const GuestDetailsPage = () => {
       throw error;
     }
   };
+  const handlePaymentSuccess = (confirmedBooking) => {
+    setConfirmedBookingId(confirmedBooking._id);
+    setBookingConfirmed(true);
+  };
   
   const calculateTotalPrice = (bookingData, guests) => {
     const roomCost = bookingData.totalPrice;
@@ -90,29 +96,43 @@ const GuestDetailsPage = () => {
     try {
       setIsSubmitting(true);
       
-      // Create booking
-      const booking = await createBooking(bookingData, data);
-      
-      // Show success message
-      toast.success("Your booking has been successfully confirmed. Check your email for details.", {
-        autoClose: 5000,
+      // Create booking first
+      const response = await fetch('http://localhost:5000/api/booking', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${Cookies.get('jwt_token')}`
+        },
+        body: JSON.stringify({
+          hotelId: bookingData.hotelId,
+          roomId: bookingData.roomId,
+          checkIn: bookingData.checkIn,
+          checkOut: bookingData.checkOut,
+          numberOfRooms: bookingData.numberOfRooms,
+          numberOfGuests: bookingData.numberOfGuests,
+          guestDetails: data.guests,
+          pricePerNight: bookingData.pricePerNight,
+          totalPrice: calculateTotalPrice(bookingData, data.guests),
+          paymentStatus: 'pending',
+          bookingStatus: 'confirmed'
+        })
       });
+  
+      if (!response.ok) {
+        throw new Error('Failed to create booking');
+      }
+  
+      const booking = await response.json();
+      setCurrentBooking(booking);
+      setShowPayment(true);
       
-
-      // Set confirmation state
-      setConfirmedBookingId(booking._id);
-      setBookingConfirmed(true);
-
     } catch (error) {
-        toast.error(error.message || "Failed to create booking. Please try again.", {
-            autoClose: 5000,
-          });
-          
+      toast.error(error.message || "Failed to create booking. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
-
+  
   const handleViewBookings = () => {
     navigate('/my-bookings');
   };
@@ -252,19 +272,29 @@ const GuestDetailsPage = () => {
                 >
                   Back
                 </Button>
-                <Button 
-                  type="submit" 
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Confirming Booking...
-                    </>
-                  ) : (
-                    'Confirm Booking'
-                  )}
-                </Button>
+                {!showPayment ? (
+  <Button 
+    type="submit" 
+    disabled={isSubmitting}
+  >
+    {isSubmitting ? (
+      <>
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+        Processing...
+      </>
+    ) : (
+      'Proceed to Payment'
+    )}
+  </Button>
+) : (
+  <PaymentComponent
+    bookingId={currentBooking._id}
+    totalAmount={currentBooking.totalPrice + currentBooking.additionalServices.totalServicesCost}
+    guestDetails={currentBooking.guestDetails}
+    onPaymentSuccess={handlePaymentSuccess}
+  />
+)}
+
               </div>
             </form>
           </Form>

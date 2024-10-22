@@ -14,7 +14,7 @@ import CompleteProfile from './features/admin/CompleteProfile';
 import HotelManagement from './features/admin/HotelManagement';
 import RoomManage from './features/admin/RoomManagement';
 import GuestDetailsPage from './pages/GuestDetailsPage';
-
+import PaymentPage from './pages/PayementPage';
 const PrivateRoute = ({ children }) => {
   const { isAuthenticated } = useAuth();
   return isAuthenticated ? children : <Navigate to="/auth" />;
@@ -124,6 +124,12 @@ path="/hotels/:id"
       <PrivateRoute>
         <GuestDetailsPage />
       </PrivateRoute>
+    }
+    />
+    <Route 
+    path="/booking/payment"
+    element={
+        <PaymentPage />
     }
     />
     </Routes>

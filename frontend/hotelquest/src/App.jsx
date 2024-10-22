@@ -10,7 +10,9 @@ import UserDetailsPage from './pages/UserDetailsPage';
 import AuthPage from './pages/AuthenticationPage';
 import HotelDashboard from './features/admin/HotelDashboard';
 import RoomManagement from './features/admin/Roomadd';
-
+import CompleteProfile from './features/admin/CompleteProfile';
+import HotelManagement from './features/admin/HotelManagement';
+import RoomManage from './features/admin/RoomManagement';
 const PrivateRoute = ({ children }) => {
   const { isAuthenticated } = useAuth();
   return isAuthenticated ? children : <Navigate to="/auth" />;
@@ -85,6 +87,30 @@ function AppContent() {
         element={
           <PrivateRoute>
             <RoomManagement />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
+        path="/complete-profile" 
+        element={
+          <PrivateRoute>
+            <CompleteProfile />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
+        path="/Edit-Details" 
+        element={
+          <PrivateRoute>
+            <HotelManagement />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
+    path="/Edit-room" 
+    element={
+          <PrivateRoute>
+            <RoomManage />
           </PrivateRoute>
         } 
       />

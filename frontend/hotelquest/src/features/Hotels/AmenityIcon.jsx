@@ -1,5 +1,7 @@
+import React from 'react';
 import { Wifi, Coffee, CircleParking } from 'lucide-react';
 import PoolIcon from '@mui/icons-material/Pool';
+
 const AmenityIcon = ({ amenity }) => {
   switch (amenity) {
     case 'wifi':

@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PlusCircle, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import axios from 'axios';
 
 const MAX_ROOMS_PER_CATEGORY = 40;
 
-const RoomManagement = () => {
+const RoomManagement = ({ hotelId,onRoomDataUpdate }) => {
   const [rooms, setRooms] = useState([]);
+  const [errors, setErrors] = useState({}); // Added errors state
   const [newRoom, setNewRoom] = useState({
     category: '',
     photos: [],
@@ -17,11 +19,48 @@ const RoomManagement = () => {
     description: '',
     availability: 0,
   });
-  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchRooms();
+  }, [hotelId]);
+
+  const fetchRooms = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      console.log('Fetching rooms...');
+      const response = await axios.get('http://localhost:5000/api/hotels/rooms', {
+        withCredentials: true,
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      console.log('Received response:', response.data);
+      setRooms(response.data);
+      onRoomDataUpdate(response.data);
+    } catch (error) {
+      console.error('Detailed error fetching rooms:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        headers: error.response?.headers
+      });
+      
+      setError(error.response?.data?.error || 'Failed to fetch rooms');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewRoom(prev => ({ ...prev, [name]: value }));
+    // Clear the specific error when the user starts typing
     setErrors(prev => ({ ...prev, [name]: '' }));
   };
 
@@ -73,43 +112,87 @@ const RoomManagement = () => {
     return Object.keys(formErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      const existingCategoryIndex = rooms.findIndex(room => room.category.toLowerCase() === newRoom.category.toLowerCase());
-      if (existingCategoryIndex !== -1) {
-        // Update existing category
-        setRooms(prev => prev.map((room, index) => 
-          index === existingCategoryIndex
-            ? { ...room, availability: Number(room.availability) + Number(newRoom.availability) }
-            : room
-        ));
-      } else {
-        // Add new category
-        setRooms(prev => [...prev, newRoom]);
+      try {
+        const formData = new FormData();
+        formData.append('category', newRoom.category);
+        formData.append('price', newRoom.price);
+        formData.append('description', newRoom.description);
+        formData.append('availability', newRoom.availability);
+        formData.append('amenities', JSON.stringify(newRoom.amenities));
+        newRoom.photos.forEach((photo, index) => {
+          formData.append(`photos`, photo);
+        });
+
+        await axios.post('http://localhost:5000/api/hotels/rooms', formData, {
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+
+        fetchRooms();
+        setNewRoom({
+          category: '',
+          photos: [],
+          amenities: [],
+          price: '',
+          description: '',
+          availability: 0,
+        });
+        setErrors({}); // Clear all errors after successful submission
+      } catch (error) {
+        console.error('Error adding/updating room:', error);
+        setErrors(prev => ({
+          ...prev,
+          submit: error.response?.data?.error || 'Failed to add/update room'
+        }));
       }
-      setNewRoom({
-        category: '',
-        photos: [],
-        amenities: [],
-        price: '',
-        description: '',
-        availability: 0,
-      });
     }
   };
 
-  const handleAvailabilityChange = (roomId, change) => {
-    setRooms(prev => prev.map((room, index) => 
-      index === roomId 
-        ? { ...room, availability: Math.max(0, Math.min(MAX_ROOMS_PER_CATEGORY, room.availability + change)) }
-        : room
-    ));
+  const handleAvailabilityChange = async (roomId, change) => {
+    try {
+      const updatedRooms = rooms.map(room => 
+        room._id === roomId
+          ? { ...room, availability: Math.max(0, Math.min(MAX_ROOMS_PER_CATEGORY, room.availability + change)) }
+          : room
+      );
+
+      setRooms(updatedRooms);
+      onRoomDataUpdate(updatedRooms); // Update parent component
+
+      await axios.put(`http://localhost:5000/api/hotels/rooms/${roomId}`, {
+        availability: updatedRooms.find(room => room._id === roomId).availability
+      }, { withCredentials: true });
+    } catch (error) {
+      console.error('Error updating room availability:', error);
+      fetchRooms(); // Refetch rooms to ensure consistency with server state
+      setError('Failed to update room availability');
+    }
   };
 
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
+    );
+  }
+
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Room Management</h1>
+    <div className="space-y-8">
+      {errors.submit && (
+        <Alert variant="destructive">
+          <AlertDescription>{errors.submit}</AlertDescription>
+        </Alert>
+      )}
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label className="block mb-2">Room Category</label>
@@ -201,12 +284,12 @@ const RoomManagement = () => {
         </div>
 
         <Button type="submit" className="w-full">Add/Update Room Category</Button>
-      </form>
+      </form> 
 
       <div className="mt-8">
         <h2 className="text-xl font-semibold mb-4">Room Inventory</h2>
-        {rooms.map((room, index) => (
-          <div key={index} className="border p-4 rounded-lg mb-4">
+        {rooms.map((room) => (
+          <div key={room._id} className="border p-4 rounded-lg mb-4">
             <h3 className="font-bold">{room.category}</h3>
             <p>Price: ${room.price} per night</p>
             <p>Amenities: {room.amenities.join(', ')}</p>
@@ -214,8 +297,8 @@ const RoomManagement = () => {
             <div className="mt-2">
               <p>Available Rooms: {room.availability}</p>
               <div className="flex gap-2 mt-1">
-                <Button onClick={() => handleAvailabilityChange(index, -1)} disabled={room.availability === 0}>-</Button>
-                <Button onClick={() => handleAvailabilityChange(index, 1)} disabled={room.availability === MAX_ROOMS_PER_CATEGORY}>+</Button>
+                <Button onClick={() => handleAvailabilityChange(room._id, -1)} disabled={room.availability === 0}>-</Button>
+                <Button onClick={() => handleAvailabilityChange(room._id, 1)} disabled={room.availability === MAX_ROOMS_PER_CATEGORY}>+</Button>
               </div>
             </div>
           </div>
@@ -226,3 +309,6 @@ const RoomManagement = () => {
 };
 
 export default RoomManagement;
+      
+
+      

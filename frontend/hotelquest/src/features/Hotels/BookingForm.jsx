@@ -30,6 +30,11 @@ const bookingSchema = z.object({
   });
   
 const BookingForm = ({ numberOfMembers = 2, checkIn, checkOut }) => {
+    // Define your constants here
+    const BASE_PRICE = 100; // Set your actual base price
+    const TAXI_PRICE = 20; // Set your actual taxi price
+    const GUIDE_PRICE = 50; // Set your actual guide price
+    const TAX_RATE = 0.1; // Set your actual tax rate (e.g., 10%)
   const [currentStep, setCurrentStep] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
   const [taxAmount, setTaxAmount] = useState(0);

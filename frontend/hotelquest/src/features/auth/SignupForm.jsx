@@ -6,9 +6,13 @@ import { Label } from "@/components/ui/label";
 import FormField from './FormField';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
+import Cookies from 'js-cookie';
 import 'react-toastify/dist/ReactToastify.css';
-
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from './AuthContext';
 export default function SignUpForm() {
+const {login} = useAuth();
+  const navigate = useNavigate();
   const [role, setRole] = useState('customer');
   const [formData, setFormData] = useState({
     name: '',
@@ -67,6 +71,16 @@ export default function SignUpForm() {
           autoClose: 5000,
           theme: "dark",
         });
+        await login({ email: formData.email, password: formData.password });
+
+        Cookies.set('jwt_token', response.data.token, { expires: 7 }); // Expires in 7 days
+        if (formData.role === 'hotel' && !response.data.profileCompleted) {
+          navigate('/complete-profile');
+        } else {
+          navigate('/dashboard');
+        }
+        login(response.data.token);
+
         // Redirect or perform other actions
       } else {
         toast.error(`Registration failed: ${response.data.message}`, {

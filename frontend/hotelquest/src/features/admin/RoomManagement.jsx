@@ -21,7 +21,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { AlertCircle, Edit, Trash, Plus, X } from 'lucide-react';
 import Cookies from 'js-cookie';
 import axios from 'axios';
-
+import Layout from '../Layout/Layout';
 const AVAILABLE_AMENITIES = [
   { id: 'wifi', label: 'WiFi' },
   { id: 'ac', label: 'Air Conditioning' },
@@ -466,6 +466,7 @@ const RoomManagement = () => {
     };
   }, []);
   return (
+    <Layout>
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">Room Management</h2>
@@ -525,6 +526,7 @@ const RoomManagement = () => {
         </DialogContent>
       </Dialog>
     </div>
+    </Layout>
   );
 };
 

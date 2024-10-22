@@ -15,18 +15,34 @@ import HotelManagement from './features/admin/HotelManagement';
 import RoomManage from './features/admin/RoomManagement';
 import GuestDetailsPage from './pages/GuestDetailsPage';
 import PaymentPage from './pages/PayementPage';
-const PrivateRoute = ({ children }) => {
-  const { isAuthenticated } = useAuth();
-  return isAuthenticated ? children : <Navigate to="/auth" />;
+
+// Updated PrivateRoute component with role checking
+const PrivateRoute = ({ children, allowedRoles }) => {
+  const { isAuthenticated, userRole } = useAuth();
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/auth" />;
+  }
+
+  // Check if user's role is included in the allowedRoles array
+  if (!allowedRoles.includes(userRole)) {
+    // Redirect based on role
+    if (userRole === 'hotel') {
+      return <Navigate to="/complete-profile" />;
+    } else if (userRole === 'customer') {
+      return <Navigate to="/hotels" />;
+    }
+    return <Navigate to="/" />;
+  }
+
+  return children;
 };
 
 function App() {
   return (
-    <>
     <AuthProvider>
       <AppContent />
     </AuthProvider>
-    </>
   );
 }
 
@@ -52,52 +68,49 @@ function AppContent() {
 
   return (
     <Routes>
+      {/* Public Routes */}
       <Route path="/" element={<LandingPage />} />
       <Route path="/auth" element={<AuthPage />} />
+
+      {/* Customer-only Routes */}
       <Route 
         path="/hotels" 
         element={
-          <PrivateRoute>
+          <PrivateRoute allowedRoles={['customer']}>
             <HotelBooking />
           </PrivateRoute>
         } 
       />
       <Route 
-path="/hotels/:id"
+        path="/hotels/:id" 
         element={
-          <PrivateRoute>
+          <PrivateRoute allowedRoles={['customer']}>
             <RoomBookingPage />
           </PrivateRoute>
         } 
       />
       <Route 
-        path="/details" 
+        path="/booking/guest-details" 
         element={
-          <PrivateRoute>
-            <UserDetailsPage />
-          </PrivateRoute>
-        } 
-      />
-       <Route 
-        path="/dashboard" 
-        element={
-          <PrivateRoute>
-            <HotelDashboard />
+          <PrivateRoute allowedRoles={['customer']}>
+            <GuestDetailsPage />
           </PrivateRoute>
         } 
       />
       <Route 
-        path="/roomadd" 
+        path="/booking/payment" 
         element={
-          <PrivateRoute>
-            <RoomManagement />
+          <PrivateRoute allowedRoles={['customer']}>
+            <PaymentPage />
           </PrivateRoute>
         } 
       />
+
+      {/* Hotel/Admin-only Routes */}
       <Route 
         path="/complete-profile" 
         element={
-          <PrivateRoute>
+          <PrivateRoute allowedRoles={['hotel']}>
             <CompleteProfile />
           </PrivateRoute>
         } 
@@ -105,36 +118,23 @@ path="/hotels/:id"
       <Route 
         path="/Edit-Details" 
         element={
-          <PrivateRoute>
+          <PrivateRoute allowedRoles={['hotel']}>
             <HotelManagement />
           </PrivateRoute>
         } 
       />
       <Route 
-    path="/Edit-room" 
-    element={
-          <PrivateRoute>
+        path="/Edit-room" 
+        element={
+          <PrivateRoute allowedRoles={['hotel']}>
             <RoomManage />
           </PrivateRoute>
         } 
       />
-    <Route
-    path="/booking/guest-details"
-    element={
-      <PrivateRoute>
-        <GuestDetailsPage />
-      </PrivateRoute>
-    }
-    />
-    <Route 
-    path="/booking/payment"
-    element={
-        <PaymentPage />
-    }
-    />
+
+      {/* Catch-all redirect */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
-
-
   );
 }
 

@@ -7,6 +7,7 @@ const path = require('path'); // Import path for handling file paths
 const checkProfileCompletion = require('../middleware/profileCheck');
 const { completeHotelProfile } = require('../controllers/userController');
 const Room = require('../models/room');
+const {authorizedRole }= require('../controllers/userController');
 // Set up multer for file uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -214,6 +215,7 @@ router.put('/update', auth, (req, res) => {
     }
   });
 });
+
 router.get('/', async (req, res) => {
   try {
     const hotels = await Hotel.find();
@@ -223,6 +225,38 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.get('/search', async (req, res) => {
+  try {
+    const { searchTerm } = req.query;
+
+    let query = {};
+
+    if (searchTerm) {
+      // Search in both name and description fields
+      query = {
+        $or: [
+          { name: { $regex: searchTerm, $options: 'i' } },
+          { description: { $regex: searchTerm, $options: 'i' } }
+        ]
+      };
+    }
+
+    const hotels = await Hotel.find(query);
+
+    res.json({
+      success: true,
+      count: hotels.length,
+      data: hotels
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error searching hotels',
+      error: error.message
+});
+}
+});
 router.post('/complete-profile', auth, upload.array('photos', 5), checkProfileCompletion, completeHotelProfile);
 
 
@@ -415,7 +449,7 @@ router.put('/rooms/:id', auth, upload.array('photos', 5), async (req, res) => {
   }
 });
 
-router.get('/:id/rooms', auth, async (req, res) => {
+router.get('/:id/rooms', auth,async (req, res) => {
   try {
       const { id } = req.params; // Correct this to 'id' instead of 'hotelId'
       

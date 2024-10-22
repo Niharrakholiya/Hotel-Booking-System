@@ -10,6 +10,8 @@ import { Form } from "@/components/ui/form";
 import { Loader2, CheckCircle2 } from "lucide-react";
 import Cookies from 'js-cookie';
 import PaymentComponent from './PayementPage';
+import BookingQRCode from './BookingQRCode';
+
 const GuestDetailsPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -17,8 +19,10 @@ const GuestDetailsPage = () => {
   const [bookingConfirmed, setBookingConfirmed] = useState(false);
   const [confirmedBookingId, setConfirmedBookingId] = useState(null);
   const bookingData = location.state?.bookingData;
+  console.log(location.state);
   const [showPayment, setShowPayment] = useState(false);
   const [currentBooking, setCurrentBooking] = useState(null);
+
   // Redirect if no booking data
   if (!bookingData) {
     navigate('/');
@@ -48,7 +52,7 @@ const GuestDetailsPage = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` // Use the token from cookies
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           hotelId: bookingData.hotelId,
@@ -60,7 +64,7 @@ const GuestDetailsPage = () => {
           guestDetails: guestData.guests,
           pricePerNight: bookingData.pricePerNight,
           totalPrice: calculateTotalPrice(bookingData, guestData.guests),
-          paymentStatus: 'completed', // Mark as completed since we're skipping payment
+          paymentStatus: 'completed',
           bookingStatus: 'confirmed'
         })
       });
@@ -75,6 +79,7 @@ const GuestDetailsPage = () => {
       throw error;
     }
   };
+
   const handlePaymentSuccess = (confirmedBooking) => {
     setConfirmedBookingId(confirmedBooking._id);
     setBookingConfirmed(true);
@@ -96,7 +101,6 @@ const GuestDetailsPage = () => {
     try {
       setIsSubmitting(true);
       
-      // Create booking first
       const response = await fetch('http://localhost:5000/api/booking', {
         method: 'POST',
         headers: {
@@ -117,7 +121,6 @@ const GuestDetailsPage = () => {
           bookingStatus: 'confirmed'
         })
       });
-  
       if (!response.ok) {
         throw new Error('Failed to create booking');
       }
@@ -140,46 +143,65 @@ const GuestDetailsPage = () => {
   const handleBack = () => {
     navigate(-1);
   };
-
+  console.log(bookingData);
   if (bookingConfirmed) {
     return (
       <Layout>
-              <ToastContainer />
-
+        <ToastContainer />
         <div className="container mx-auto px-4 py-8">
-          <div className="max-w-2xl mx-auto text-center">
+          <div className="max-w-4xl mx-auto text-center">
             <div className="mb-6">
               <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-4" />
               <h1 className="text-3xl font-bold mb-4">Booking Confirmed!</h1>
               <p className="text-gray-600 mb-2">Your booking has been successfully confirmed.</p>
               <p className="text-gray-600 mb-6">Booking ID: {confirmedBookingId}</p>
             </div>
+            
+            <div className="grid grid-cols-2  mb-8">
+  {/* Booking Details Section */}
+  <div className="bg-gray-50 p-6 rounded-lg text-left">
+    <h2 className="text-xl font-semibold mb-4">Booking Details</h2>
+    <div className="grid gap-4">
+      <div>
+        <p className="text-gray-600">Hotel</p>
+        <p className="font-medium">{bookingData.hotelName}</p>
+      </div>
+      <div>
+        <p className="text-gray-600">Room Type</p>
+        <p className="font-medium">{bookingData.roomType}</p>
+      </div>
+      <div>
+        <p className="text-gray-600">Check-in Date</p>
+        <p className="font-medium">{new Date(bookingData.checkIn).toLocaleDateString()}</p>
+      </div>
+      <div>
+        <p className="text-gray-600">Check-out Date</p>
+        <p className="font-medium">{new Date(bookingData.checkOut).toLocaleDateString()}</p>
+      </div>
+      <div>
+        <p className="text-gray-600">Total Amount</p>
+        <p className="font-medium">₹{calculateTotalPrice(bookingData, form.getValues().guests).toLocaleString()}</p>
+      </div>
+    </div>
+  </div>
 
-            <div className="bg-gray-50 p-6 rounded-lg mb-8 text-left">
-              <h2 className="text-xl font-semibold mb-4">Booking Details</h2>
-              <div className="grid gap-4">
-                <div>
-                  <p className="text-gray-600">Hotel</p>
-                  <p className="font-medium">{bookingData.hotelName}</p>
-                </div>
-                <div>
-                  <p className="text-gray-600">Room Type</p>
-                  <p className="font-medium">{bookingData.roomType}</p>
-                </div>
-                <div>
-                  <p className="text-gray-600">Check-in Date</p>
-                  <p className="font-medium">{new Date(bookingData.checkIn).toLocaleDateString()}</p>
-                </div>
-                <div>
-                  <p className="text-gray-600">Check-out Date</p>
-                  <p className="font-medium">{new Date(bookingData.checkOut).toLocaleDateString()}</p>
-                </div>
-                <div>
-                  <p className="text-gray-600">Total Amount</p>
-                  <p className="font-medium">₹{calculateTotalPrice(bookingData, form.getValues().guests).toLocaleString()}</p>
-                </div>
-              </div>
-            </div>
+  {/* QR Code Section */}
+  <div className="flex items-center justify-center bg-gray-50 p-6 rounded-lg">
+    <BookingQRCode
+      bookingDetails={{
+        _id: confirmedBookingId,
+        hotelId: bookingData.hotelId,
+        hotelName: bookingData.hotelName,
+        checkIn: bookingData.checkIn,
+        checkOut: bookingData.checkOut,
+        numberOfRooms: bookingData.numberOfRooms,
+        numberOfGuests: bookingData.numberOfGuests,
+        guestDetails: form.getValues().guests,
+        totalPrice: calculateTotalPrice(bookingData, form.getValues().guests)
+      }}
+    />
+  </div>
+</div>
 
             <div className="flex justify-center gap-4">
               <Button onClick={handleViewBookings}>
@@ -195,6 +217,7 @@ const GuestDetailsPage = () => {
     );
   }
 
+  // Rest of the component remains the same...
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
@@ -273,28 +296,27 @@ const GuestDetailsPage = () => {
                   Back
                 </Button>
                 {!showPayment ? (
-  <Button 
-    type="submit" 
-    disabled={isSubmitting}
-  >
-    {isSubmitting ? (
-      <>
-        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        Processing...
-      </>
-    ) : (
-      'Proceed to Payment'
-    )}
-  </Button>
-) : (
-  <PaymentComponent
-    bookingId={currentBooking._id}
-    totalAmount={currentBooking.totalPrice + currentBooking.additionalServices.totalServicesCost}
-    guestDetails={currentBooking.guestDetails}
-    onPaymentSuccess={handlePaymentSuccess}
-  />
-)}
-
+                  <Button 
+                    type="submit" 
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      'Proceed to Payment'
+                    )}
+                  </Button>
+                ) : (
+                  <PaymentComponent
+                    bookingId={currentBooking._id}
+                    totalAmount={currentBooking.totalPrice + currentBooking.additionalServices.totalServicesCost}
+                    guestDetails={currentBooking.guestDetails}
+                    onPaymentSuccess={handlePaymentSuccess}
+                  />
+                )}
               </div>
             </form>
           </Form>

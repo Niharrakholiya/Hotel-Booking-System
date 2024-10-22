@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-
+import Layout from '../Layout/Layout';
 const HotelManagement = () => {
   const [hotel, setHotel] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -105,6 +105,7 @@ const HotelManagement = () => {
   }
 
   return (
+    <Layout>
     <div className="container mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">Hotel Management</h1>
       
@@ -257,6 +258,7 @@ const HotelManagement = () => {
         </div>
       </form>
     </div>
+    </Layout>
   );
 };
 

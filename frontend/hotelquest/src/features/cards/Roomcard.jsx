@@ -60,7 +60,9 @@ const RoomCard = ({ room, hotelId }) => {
       state: { bookingData }
     });
   };
+ let aminities=JSON.parse(room.amenities[0])
 
+console.log(room.amenities)
   return (
     <Card className="w-full">
       <CardHeader>
@@ -69,7 +71,7 @@ const RoomCard = ({ room, hotelId }) => {
       <CardContent>
         <img src={room.photo} alt={room.type} className="w-full h-48 object-cover mb-4 rounded-md" />
         <div className="flex flex-wrap gap-2 mb-4">
-          {room.amenities.map((amenityKey, index) => (
+          {aminities.map((amenityKey, index) => (
             <div key={index} className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-md">
               <AmenityIcon amenityKey={amenityKey} />
               <span className="text-sm">{getDisplayName(amenityKey)}</span>

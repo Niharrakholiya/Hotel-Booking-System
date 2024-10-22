@@ -101,7 +101,8 @@ const userLogin = async (req, res) => {
         if (user.email === email && isMatch) {
           // Generate JWT Token
           const token = jwt.sign({ userID: user._id, role: user.role }, process.env.JWT_SECRET_KEY, { expiresIn: '5d' });
-          
+          console.log('User:', user);
+          console.log('Token:', token);
           const hotel = await Hotel.findOne({ user: user._id });
           
           // Check if hotel profile is incomplete

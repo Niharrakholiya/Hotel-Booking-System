@@ -1,21 +1,36 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Wifi, Tv, Wind, Coffee, Bath } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import DateSelectionModal from './DateSelectionModal';
 
-const AmenityIcon = ({ amenity }) => {
-  const icons = {
-    'Free Wi-Fi': <Wifi className="h-4 w-4" />,
-    'TV': <Tv className="h-4 w-4" />,
-    'Air Conditioning': <Wind className="h-4 w-4" />,
-    'Mini Bar': <Coffee className="h-4 w-4" />,
-    'Jacuzzi': <Bath className="h-4 w-4" />
+const getDisplayName = (amenityKey) => {
+  const nameMap = {
+    'wifi': 'Free Wi-Fi',
+    'minibar': 'Mini Bar',
+    'roomService': 'Room Service',
+    'tv': 'TV',
+    'airConditioning': 'Air Conditioning',
+    'jacuzzi': 'Jacuzzi'
   };
-  return icons[amenity] || null;
+  return nameMap[amenityKey] || amenityKey;
 };
 
-const RoomCard = ({ room, onBook }) => {
+const AmenityIcon = ({ amenityKey }) => {
+  const iconMap = {
+    'wifi': <Wifi className="h-4 w-4" />,
+    'tv': <Tv className="h-4 w-4" />,
+    'airConditioning': <Wind className="h-4 w-4" />,
+    'minibar': <Coffee className="h-4 w-4" />,
+    'jacuzzi': <Bath className="h-4 w-4" />,
+    'roomService': <Coffee className="h-4 w-4" />
+  };
+  return iconMap[amenityKey] || null;
+};
+
+const RoomCard = ({ room, hotelId }) => {
+  const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleBookClick = () => {
@@ -27,8 +42,23 @@ const RoomCard = ({ room, onBook }) => {
   };
 
   const handleBookConfirm = (bookingDetails) => {
-    onBook({ ...room, ...bookingDetails });
-    setIsModalOpen(false);
+    // Prepare booking data
+    const bookingData = {
+      hotelId,
+      roomId: room._id,
+      roomType: room.type,
+      checkIn: bookingDetails.checkIn,
+      checkOut: bookingDetails.checkOut,
+      numberOfGuests: bookingDetails.guests,
+      numberOfRooms: bookingDetails.rooms,
+      totalPrice: bookingDetails.totalPrice,
+      pricePerNight: room.price
+    };
+
+    // Encode booking data to pass via URL state
+    navigate('/booking/guest-details', { 
+      state: { bookingData }
+    });
   };
 
   return (
@@ -39,10 +69,10 @@ const RoomCard = ({ room, onBook }) => {
       <CardContent>
         <img src={room.photo} alt={room.type} className="w-full h-48 object-cover mb-4 rounded-md" />
         <div className="flex flex-wrap gap-2 mb-4">
-          {room.amenities.map((amenity, index) => (
+          {room.amenities.map((amenityKey, index) => (
             <div key={index} className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-md">
-              <AmenityIcon amenity={amenity} />
-              <span className="text-sm">{amenity}</span>
+              <AmenityIcon amenityKey={amenityKey} />
+              <span className="text-sm">{getDisplayName(amenityKey)}</span>
             </div>
           ))}
         </div>
@@ -58,6 +88,7 @@ const RoomCard = ({ room, onBook }) => {
         onClose={handleModalClose}
         onConfirm={handleBookConfirm}
         roomPrice={room.price}
+        room={room}
       />
     </Card>
   );

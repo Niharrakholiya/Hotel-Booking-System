@@ -13,6 +13,8 @@ import RoomManagement from './features/admin/Roomadd';
 import CompleteProfile from './features/admin/CompleteProfile';
 import HotelManagement from './features/admin/HotelManagement';
 import RoomManage from './features/admin/RoomManagement';
+import GuestDetailsPage from './pages/GuestDetailsPage';
+
 const PrivateRoute = ({ children }) => {
   const { isAuthenticated } = useAuth();
   return isAuthenticated ? children : <Navigate to="/auth" />;
@@ -20,9 +22,11 @@ const PrivateRoute = ({ children }) => {
 
 function App() {
   return (
+    <>
     <AuthProvider>
       <AppContent />
     </AuthProvider>
+    </>
   );
 }
 
@@ -59,7 +63,7 @@ function AppContent() {
         } 
       />
       <Route 
-        path="/book" 
+path="/hotels/:id"
         element={
           <PrivateRoute>
             <RoomBookingPage />
@@ -114,7 +118,17 @@ function AppContent() {
           </PrivateRoute>
         } 
       />
+    <Route
+    path="/booking/guest-details"
+    element={
+      <PrivateRoute>
+        <GuestDetailsPage />
+      </PrivateRoute>
+    }
+    />
     </Routes>
+
+
   );
 }
 

@@ -1,3 +1,4 @@
+import React from 'react'
 import Layout from '@/features/Layout/Layout'
 import AuthForm from '../features/auth/Authform'
 

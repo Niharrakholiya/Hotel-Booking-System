@@ -5,20 +5,24 @@ import axios from 'axios';
 import { MapPin } from 'lucide-react';
 
 const apiKey = 'Ekab6xJdKU9YhawzXPNXxkUQtx02CdfDTAqDY3em';
-const location = '21.2049, 72.8411'; // Example location (latitude,longitude)
+// const location = '21.2049, 72.8411'; // Example location (latitude,longitude)
 
-const Overview = () => {
+const Overview = ({ hotel }) => {
   const [mapReady, setMapReady] = useState(false);
   const [places, setPlaces] = useState([]);
   const [map, setMap] = useState(null);
   const [error, setError] = useState(null);
+ // Extract coordinates from hotel data
+ const latitude = hotel.location.coordinates[0];
+ const longitude = hotel.location.coordinates[1];
+ const location = `${latitude}, ${longitude}`;
 
   useEffect(() => {
     if (!mapReady) return;
 
     const newMap = new MapLibreMap({
       container: 'map-container',
-      center: [72.8411, 21.2049],
+      center: [latitude, longitude],
       zoom: 15,
       style: 'https://api.olamaps.io/tiles/vector/v1/styles/default-light-standard/style.json',
       transformRequest: (url, resourceType) => {
@@ -38,14 +42,14 @@ const Overview = () => {
 
     // Add hotel marker
     new Marker({ color: '#FF0000' })
-      .setLngLat([72.8411, 21.2049])
+      .setLngLat([longitude, latitude])
       .setPopup(new Popup().setText("Hotel Location"))
       .addTo(newMap);
 
     setMap(newMap);
 
     return () => newMap.remove();
-  }, [mapReady]);
+  }, [mapReady, latitude, longitude, hotel.name]);
 
   useEffect(() => {
     if (!map) return;
@@ -89,7 +93,7 @@ const Overview = () => {
     };
 
     fetchNearbyPlaces();
-  }, [map]);
+  }, [map,location]);
 
   return (
     <>

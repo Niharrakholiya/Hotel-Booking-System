@@ -1,70 +1,100 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import Cookies from 'js-cookie';
 import Layout from '@/features/Layout/Layout';
 import HotelPhotos from '../features/Hotels/HotelPhotos';
 import Overview from '../features/Hotels/Overview';
 import RoomCard from '../features/cards/RoomCard';
 
-const RoomBookingPage = ({ hotelId }) => {
-  const [selectedRoom, setSelectedRoom] = useState(null);
-  const [selectedServices, setSelectedServices] = useState([]);
+const RoomBookingPage = () => {
+  const { id } = useParams();
+  const [hotel, setHotel] = useState(null);
+  const [rooms, setRooms] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Mock data for the hotel
-  const hotel = {
-    id: hotelId,
-    name: "Luxury Palace Hotel",
-    location: "Mumbai, India",
-    distanceToRailway: 2.5,
-    distanceToAirport: 15,
-    rooms: [
-      {
-        type: "Standard",
-        photo: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&w=800&q=80",
-        amenities: ["Free Wi-Fi", "TV", "Air Conditioning"],
-        price: 1000
-      },
-      {
-        type: "Deluxe",
-        photo: "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=800&q=80",
-        amenities: ["Free Wi-Fi", "TV", "Air Conditioning", "Mini Bar"],
-        price: 1500
-      },
-      {
-        type: "Suite",
-        photo: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80",
-        amenities: ["Free Wi-Fi", "TV", "Air Conditioning", "Mini Bar", "Jacuzzi"],
-        price: 2500
+  useEffect(() => {
+    const fetchHotelAndRooms = async () => {
+      if (!id) return;
+      
+      // Get the authentication token from cookies
+      const token = Cookies.get('jwt_token');
+      
+      // Prepare headers with authentication
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      };
+
+      try {
+        // Fetch hotel details with auth headers
+        const hotelResponse = await fetch(`http://localhost:5000/api/hotels/${id}`, {
+          method: 'GET',
+          headers
+        });
+        
+        if (!hotelResponse.ok) {
+          if (hotelResponse.status === 401) {
+            throw new Error('Please login to view hotel details');
+          }
+          throw new Error('Failed to fetch hotel details');
+        }
+        const hotelData = await hotelResponse.json();
+        
+        // Fetch rooms with auth headers
+        const roomsResponse = await fetch(`http://localhost:5000/api/hotels/${id}/rooms`, {
+          method: 'GET',
+          headers
+        });
+        
+        if (!roomsResponse.ok) {
+          if (roomsResponse.status === 401) {
+            throw new Error('Please login to view room details');
+          }
+          throw new Error('Failed to fetch rooms');
+        }
+        const roomsData = await roomsResponse.json();
+        
+        setHotel(hotelData);
+        setRooms(roomsData.data || []);
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setError(err.message);
+        setLoading(false);
       }
-    ]
-  };
-  const additionalServices = [
-    { id: 'tourGuide', name: 'Tour Guide', price: 50 },
-    { id: 'taxiService', name: 'Taxi Service', price: 30 }
-  ];
+    };
 
-  const handleServiceToggle = (serviceId) => {
-    setSelectedServices(prevServices =>
-      prevServices.includes(serviceId)
-        ? prevServices.filter(id => id !== serviceId)
-        : [...prevServices, serviceId]
-    );
-  };
+    fetchHotelAndRooms();
+  }, [id]);
 
-  const calculateTotalPrice = () => {
-    let total = selectedRoom ? selectedRoom.price : 0;
-    selectedServices.forEach(serviceId => {
-      const service = additionalServices.find(s => s.id === serviceId);
-      if (service) {
-        total += service.price;
-      }
-    });
-    return total;
-  };
+  if (loading) return (
+    <Layout>
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">Loading...</div>
+      </div>
+    </Layout>
+  );
 
-  const handleBookRoom = (room) => {
-    setSelectedRoom(room);
-    // Here you would typically open a modal or navigate to a booking form
-    console.log("Booking room:", room);
-  };
+  if (error) return (
+    <Layout>
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center text-red-500">
+          {error}
+          {error.includes('Please login') && (
+            <button 
+              className="ml-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              onClick={() => window.location.href = '/login'}
+            >
+              Login
+            </button>
+          )}
+        </div>
+      </div>
+    </Layout>
+  );
+
+  if (!hotel) return null;
 
   return (
     <Layout>
@@ -73,14 +103,25 @@ const RoomBookingPage = ({ hotelId }) => {
         <HotelPhotos hotel={hotel} />
         <Overview hotel={hotel} />
         
-        {/* Corrected part: Map through hotel rooms */}
+        <h2 className="text-2xl font-semibold mt-8 mb-4">Available Rooms</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {hotel.rooms.map((room, index) => (
-            <RoomCard key={index} room={room} onBook={handleBookRoom} />
+          {rooms.map((room) => (
+            <RoomCard 
+            key={room._id} 
+            room={{
+              _id: room._id,  // Make sure to include the room ID
+              type: room.roomType,
+              photo: room.photos[0] ? `http://localhost:5000/${room.photos[0]}` : null,
+              amenities: room.amenities,
+              price: room.pricePerNight,
+              description: room.description,
+              capacity: room.capacity,
+              availability: room.roomAvailability
+            }}
+            hotelId={id}  // Pass the hotel ID from useParams
+          />
           ))}
         </div>
-
-      
       </div>
     </Layout>
   );

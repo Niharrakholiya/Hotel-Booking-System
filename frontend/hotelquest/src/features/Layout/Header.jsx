@@ -43,7 +43,7 @@ console.log(isHotel);
                 <Link to="/edit-details" className="text-base font-medium text-gray-500 hover:text-gray-900">
                   Edit Hotel
                 </Link>
-                <Link to="/edit-rooms" className="text-base font-medium text-gray-500 hover:text-gray-900">
+                <Link to="/edit-room" className="text-base font-medium text-gray-500 hover:text-gray-900">
                   Edit Rooms
                 </Link>
               </>

@@ -10,8 +10,9 @@ import Cookies from 'js-cookie';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
+
 export default function SignUpForm() {
-const {login} = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
   const [role, setRole] = useState('customer');
   const [formData, setFormData] = useState({
@@ -57,31 +58,30 @@ const {login} = useAuth();
       role,
     };
   
-    console.log('Payload before sending:', JSON.stringify(payload)); // Log the payload
-  
     try {
       const response = await axios.post('http://localhost:5000/api/user/register', payload);
   
-
-      console.log('Server response:', response.data); // Log server response
-
       if (response.data.status === 'success') {
+        // Handle successful registration
         toast.success('Registration successful!', {
           position: "top-left",
           autoClose: 5000,
           theme: "dark",
         });
-        await login({ email: formData.email, password: formData.password });
 
-        Cookies.set('jwt_token', response.data.token, { expires: 7 }); // Expires in 7 days
-        if (formData.role === 'hotel' && !response.data.profileCompleted) {
-          navigate('/complete-profile');
+        // Set the JWT token and update authentication state
+        if (response.data.token) {
+          login(response.data.token);
+          
+          // Redirect based on role and profile completion
+          if (role === 'hotel' && !response.data.profileCompleted) {
+            navigate('/complete-profile');
+          } else {
+            navigate('/dashboard');
+          }
         } else {
-          navigate('/dashboard');
+          throw new Error('No token received from server');
         }
-        login(response.data.token);
-
-        // Redirect or perform other actions
       } else {
         toast.error(`Registration failed: ${response.data.message}`, {
           position: "top-left",
@@ -90,23 +90,15 @@ const {login} = useAuth();
         });
       }
     } catch (error) {
-      console.error('Error during registration:', error); // Log any errors
-      if (error.response && error.response.data) {
-        toast.error(`Error: ${error.response.data.message}`, {
-          position: "top-left",
-          autoClose: 5000,
-          theme: "dark",
-        });
-      } else {
-        toast.error('An unexpected error occurred. Please try again.', {
-          position: "top-left",
-          autoClose: 5000,
-          theme: "dark",
-        });
-      }
+      console.error('Error during registration:', error);
+      const errorMessage = error.response?.data?.message || 'An unexpected error occurred. Please try again.';
+      toast.error(`Error: ${errorMessage}`, {
+        position: "top-left",
+        autoClose: 5000,
+        theme: "dark",
+      });
     }
   };
-
   // ... rest of the component remains the same
 
 

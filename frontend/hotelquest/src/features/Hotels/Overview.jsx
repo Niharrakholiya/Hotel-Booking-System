@@ -42,7 +42,7 @@ const Overview = ({ hotel }) => {
 
     // Add hotel marker
     new Marker({ color: '#FF0000' })
-      .setLngLat([longitude, latitude])
+      .setLngLat([latitude, longitude])
       .setPopup(new Popup().setText("Hotel Location"))
       .addTo(newMap);
 

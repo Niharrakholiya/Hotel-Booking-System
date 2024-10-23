@@ -15,7 +15,7 @@ import HotelManagement from './features/admin/HotelManagement';
 import RoomManage from './features/admin/RoomManagement';
 import GuestDetailsPage from './pages/GuestDetailsPage';
 import PaymentPage from './pages/PayementPage';
-
+import MyBookings from './pages/MyBookingPage';
 // Updated PrivateRoute component with role checking
 const PrivateRoute = ({ children, allowedRoles }) => {
   const { isAuthenticated, userRole } = useAuth();
@@ -128,6 +128,14 @@ function AppContent() {
         element={
           <PrivateRoute allowedRoles={['hotel']}>
             <RoomManage />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
+        path="/My-Bookings" 
+        element={
+          <PrivateRoute allowedRoles={['customer']}>
+            <MyBookings />
           </PrivateRoute>
         } 
       />

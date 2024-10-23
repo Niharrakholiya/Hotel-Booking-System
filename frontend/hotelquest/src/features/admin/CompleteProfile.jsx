@@ -50,30 +50,9 @@ const CompleteProfile = () => {
   };
 
   const handleNext = async () => {
+    // Move to next step without sending data
     if (currentStep === 1) {
-      try {
-        const formDataToSend = new FormData();
-        Object.keys(formData).forEach(key => {
-          if (key === 'amenities') {
-            formDataToSend.append(key, JSON.stringify(formData[key]));
-          } else if (key === 'photos') {
-            formData[key].forEach(photo => formDataToSend.append('photos', photo));
-          } else {
-            formDataToSend.append(key, formData[key]);
-          }
-        });
-
-        await axios.post('http://localhost:5000/api/hotels/complete-profile', formDataToSend, {
-          withCredentials: true,
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-
-        setCurrentStep(2);
-      } catch (error) {
-        console.error('Error completing profile:', error);
-      }
+      setCurrentStep(2);
     } else if (currentStep === 2) {
       setCurrentStep(3);
     }
@@ -91,31 +70,36 @@ const CompleteProfile = () => {
     try {
       const hotelData = new FormData();
   
-      // Check if a location is selected
+      // Add location data
       if (selectedLocation) {
-        // Structure the location as expected
         const locationData = {
-          type: 'Point', // Required type
-          coordinates: [selectedLocation.lng, selectedLocation.lat], // Ensure coordinates are in [longitude, latitude] order
+          type: 'Point',
+          coordinates: [selectedLocation.lng, selectedLocation.lat],
         };
-        hotelData.append('location', JSON.stringify(locationData)); // Append the structured location data
+        hotelData.append('location', JSON.stringify(locationData));
       } else {
-        console.error('No location selected'); // Log if no location is selected
-        return; // Exit the function if no location is selected
+        console.error('No location selected');
+        return;
       }
   
-      // Add other necessary data to hotelData here (e.g., formData fields)
+      // Add all other form data
       Object.keys(formData).forEach(key => {
         if (key === 'amenities') {
           hotelData.append(key, JSON.stringify(formData[key]));
         } else if (key === 'photos') {
+          // Only append photos here, in the final submission
           formData[key].forEach(photo => hotelData.append('photos', photo));
         } else {
           hotelData.append(key, formData[key]);
         }
       });
   
-      // Make API call to submit final data
+      // Add room data if needed
+      if (roomData.length > 0) {
+        hotelData.append('rooms', JSON.stringify(roomData));
+      }
+  
+      // Make single API call with all data
       await axios.post('http://localhost:5000/api/hotels/complete-profile', hotelData, {
         withCredentials: true,
         headers: {
@@ -123,12 +107,11 @@ const CompleteProfile = () => {
         },
       });
   
-      navigate('/'); // Navigate after successful submission
+      navigate('/');
     } catch (error) {
       console.error('Error completing setup:', error);
     }
   };
-  
 
   return (
     <div className="w-full max-w-4xl mx-auto mt-10 space-y-6">

@@ -55,12 +55,10 @@ console.log(isHotel);
                 <Link to="/hotels" className="text-base font-medium text-gray-500 hover:text-gray-900">
                   Hotels
                 </Link>
-                <Link to="/deals" className="text-base font-medium text-gray-500 hover:text-gray-900">
-                  Deals
+                <Link to="/my-bookings" className="text-base font-medium text-gray-500 hover:text-gray-900">
+                  My Bookings
                 </Link>
-                <Link to="/about" className="text-base font-medium text-gray-500 hover:text-gray-900">
-                  About
-                </Link>
+               
               </>
             )}
           </nav>

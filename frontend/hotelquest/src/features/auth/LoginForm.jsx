@@ -63,7 +63,7 @@ export default function LoginForm() {
         // Store JWT token in cookies
         Cookies.set('jwt_token', response.data.token, { 
           expires: 7, 
-          secure: process.env.NODE_ENV === 'production',
+          secure: import.meta.env.VITE_NODE_ENV === 'production',
           sameSite: 'strict'  
         });
         
@@ -190,7 +190,7 @@ export default function LoginForm() {
       </CardContent>
       <CardFooter className="flex justify-center">
         <p className="text-sm text-gray-600">
-          Don't have an account?{' '}
+        Don&apos;t have an account?{' '}
           <a
             href="/signup"
             className="text-blue-600 hover:underline font-medium"

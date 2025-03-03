@@ -1,28 +1,40 @@
-// AuthForm.jsx
 'use client'
-import React from 'react'
-import { useState } from 'react'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+
+import React, { useState } from 'react'
 import LoginForm from './LoginForm'
 import SignupForm from './SignupForm'
 
 export default function AuthForm() {
-  const [isLogin, setIsLogin] = useState(true)
-
+  const [activeTab, setActiveTab] = useState('login')
+  
   return (
-    <div className="w-full max-w-md mx-auto space-y-6">
-      <Tabs defaultValue="login" onValueChange={(value) => setIsLogin(value === 'login')}>
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="login">Login</TabsTrigger>
-          <TabsTrigger value="signup">Sign Up</TabsTrigger>
-        </TabsList>
-        <TabsContent value="login">
-          <LoginForm />
-        </TabsContent>
-        <TabsContent value="signup">
-          <SignupForm />
-        </TabsContent>
-      </Tabs>
+    <div className="w-full max-w-md mx-auto">
+      <div className="flex mb-6">
+        <button
+          onClick={() => setActiveTab('login')}
+          className={`flex-1 py-3 px-6 text-center font-medium transition-all duration-200 ${
+            activeTab === 'login' 
+              ? "bg-black text-white rounded-full" 
+              : "bg-gray-50 text-gray-700"
+          }`}
+        >
+          Login
+        </button>
+        <button
+          onClick={() => setActiveTab('signup')}
+          className={`flex-1 py-3 px-6 text-center font-medium transition-all duration-200 ${
+            activeTab === 'signup' 
+              ? "bg-black text-white rounded-full" 
+              : "bg-gray-50 text-gray-700"
+          }`}
+        >
+          Sign Up
+        </button>
+      </div>
+      {/* Tab content */}
+      <div className="px-1">
+        {activeTab === 'login' ? <LoginForm /> : <SignupForm />}
+      </div>
     </div>
   )
 }

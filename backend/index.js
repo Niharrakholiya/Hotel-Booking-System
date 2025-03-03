@@ -26,8 +26,11 @@ app.use((req, res, next) => {
 
 // Enable CORS for frontend and allow credentials (cookies)
 app.use(cors({
-  origin: '*', // Allow requests from this origin (frontend)
-  credentials: true // Allow sending cookies with requests
+  origin: [
+    'https://hotel-booking-system-p50a.onrender.com',
+    'https://hotel-booking-system-p50a.onrender.com/'
+  ],
+  credentials: true
 }));
 
 // API Routes

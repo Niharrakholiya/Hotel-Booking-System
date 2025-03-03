@@ -26,7 +26,7 @@ app.use((req, res, next) => {
 
 // Enable CORS for frontend and allow credentials (cookies)
 app.use(cors({
-  origin: 'http://localhost:5173', // Allow requests from this origin (frontend)
+  origin: '*', // Allow requests from this origin (frontend)
   credentials: true // Allow sending cookies with requests
 }));
 

@@ -4,7 +4,7 @@ import Cookies from 'js-cookie';
 import Layout from '@/features/Layout/Layout';
 import HotelPhotos from '../features/Hotels/HotelPhotos';
 import Overview from '../features/Hotels/Overview';
-import RoomCard from '../features/cards/RoomCard';
+import RoomCard from '../features/cards/Roomcard';
 
 const RoomBookingPage = () => {
   const { id } = useParams();

@@ -125,7 +125,7 @@ export default function SignUpForm() {
     };
   
     try {
-      const response = await axios.post('http://localhost:5000/api/user/register', payload);
+      const response = await axios.post('https://backend-vewg.onrender.com/api/user/register', payload);
   
       if (response.data.status === 'success') {
         toast.success('Registration successful!', {

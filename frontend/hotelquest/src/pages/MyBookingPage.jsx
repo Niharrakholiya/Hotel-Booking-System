@@ -16,7 +16,7 @@ const MyBookings = () => {
   const fetchBookings = async () => {
     try {
       const token = Cookies.get('jwt_token'); // Get token from js-cookie
-      const response = await fetch('http://localhost:5000/api/booking/my-bookings', {
+      const response = await fetch('https://backend-vewg.onrender.com/api/booking/my-bookings', {
         headers: {
           'Authorization': `Bearer ${token}` // Use token from Cookies
         }

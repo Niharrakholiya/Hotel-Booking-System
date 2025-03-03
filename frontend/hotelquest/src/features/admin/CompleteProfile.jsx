@@ -100,7 +100,7 @@ const CompleteProfile = () => {
       }
   
       // Make single API call with all data
-      await axios.post('http://localhost:5000/api/hotels/complete-profile', hotelData, {
+      await axios.post('https://backend-vewg.onrender.com/api/hotels/complete-profile', hotelData, {
         withCredentials: true,
         headers: {
           'Content-Type': 'multipart/form-data',

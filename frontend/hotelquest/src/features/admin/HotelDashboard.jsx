@@ -34,7 +34,7 @@ const HotelDashboard = () => {
 
   const fetchHotelDetails = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/hotels/me', { withCredentials: true });
+      const response = await axios.get('https://backend-vewg.onrender.com/api/hotels/me', { withCredentials: true });
       const data = response.data;
 
       if (!data.profileCompleted) {
@@ -85,7 +85,7 @@ const HotelDashboard = () => {
       formDataToSend.append('amenities', JSON.stringify(formData.amenities));
       formData.photos.forEach((photo) => formDataToSend.append('photos', photo));
 
-      const response = await axios.put('http://localhost:5000/api/hotels/update', formDataToSend, {
+      const response = await axios.put('https://backend-vewg.onrender.com/api/hotels/update', formDataToSend, {
         withCredentials: true,
         headers: {
           'Content-Type': 'multipart/form-data',

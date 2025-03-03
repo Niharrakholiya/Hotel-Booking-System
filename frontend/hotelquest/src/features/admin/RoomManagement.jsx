@@ -350,7 +350,7 @@ const RoomManagement = () => {
       const token = getAuthToken();
       if (!token) throw new Error('Authentication token not found');
 
-      const response = await axios.get('http://localhost:5000/api/hotels/me', {
+      const response = await axios.get('https://backend-vewg.onrender.com/api/hotels/me', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -405,7 +405,7 @@ const RoomManagement = () => {
 
       const url = selectedRoom 
         ? `http://localhost:5000/api/hotels/rooms/${selectedRoom._id}`
-        : 'http://localhost:5000/api/hotels/rooms';
+        : 'https://backend-vewg.onrender.com/api/hotels/rooms';
       
       const response = await axios({
         method: selectedRoom ? 'put' : 'post',

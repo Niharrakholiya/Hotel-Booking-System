@@ -26,7 +26,7 @@ const HotelManagement = () => {
   const fetchHotelData = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:5000/api/hotels/me');
+      const response = await axios.get('https://backend-vewg.onrender.com/api/hotels/me');
       const hotelData = {
         ...response.data,
         amenities: response.data.amenities || [],

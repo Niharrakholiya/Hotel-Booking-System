@@ -48,7 +48,7 @@ const GuestDetailsPage = () => {
   const createBooking = async (bookingData, guestData) => {
     // eslint-disable-next-line no-useless-catch
     try {
-      const response = await fetch('http://localhost:5000/api/booking', {
+      const response = await fetch('https://backend-vewg.onrender.com/api/booking', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -101,7 +101,7 @@ const GuestDetailsPage = () => {
     try {
       setIsSubmitting(true);
       
-      const response = await fetch('http://localhost:5000/api/booking', {
+      const response = await fetch('https://backend-vewg.onrender.com/api/booking', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

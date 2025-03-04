@@ -30,6 +30,7 @@ app.use(cors({
     'https://hotel-booking-system-p50a.onrender.com',
     'https://hotel-booking-system-p50a.onrender.com/',
     'https://localhost:5173',
+    'http://localhost:5173/',
   ],
   credentials: true
 }));

@@ -28,7 +28,8 @@ app.use((req, res, next) => {
 app.use(cors({
   origin: [
     'https://hotel-booking-system-p50a.onrender.com',
-    'https://hotel-booking-system-p50a.onrender.com/'
+    'https://hotel-booking-system-p50a.onrender.com/',
+    'https://localhost:5173',
   ],
   credentials: true
 }));
